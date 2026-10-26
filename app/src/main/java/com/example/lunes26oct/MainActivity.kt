@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.lunes26oct.ui.theme.Categoria
 import com.example.lunes26oct.ui.theme.Gasto
 import com.example.lunes26oct.ui.theme.Lunes26octTheme
 import com.example.lunes26oct.ui.theme.ModeloGastos
@@ -38,7 +37,7 @@ class MainActivity : ComponentActivity() {
             var resumen by remember { mutableStateOf(modelo.resumenCategorias()) }
             var mensaje by remember { mutableStateOf("") }
             var agregando by rememberSaveable { mutableStateOf(false) }
-            var categorias by remember { mutableStateOf(modelo.leeCategorias()) }
+            val categorias = remember { modelo.leeCategorias() }
             BackHandler(enabled = agregando) { agregando = false }
 
             Lunes26octTheme {
@@ -46,13 +45,6 @@ class MainActivity : ComponentActivity() {
                     if (agregando) {
                         AgregarGasto(
                             categorias = categorias,
-                            onCrearCategoria = { nombre ->
-                                if (modelo.insertaCategoria(Categoria(nombre = nombre))) {
-                                    categorias = modelo.leeCategorias()
-                                    resumen = modelo.resumenCategorias()
-                                    categorias.firstOrNull { it.nombre == nombre }
-                                } else null
-                            },
                             onGuardar = { monto, concepto, categoriaId ->
                                 val guardado = modelo.insertaGasto(
                                     Gasto(categoriaId = categoriaId, descripcion = concepto, monto = monto)

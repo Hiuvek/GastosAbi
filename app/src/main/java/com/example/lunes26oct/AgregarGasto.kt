@@ -32,7 +32,6 @@ private val PaletaGastos = lightColorScheme(
 @Composable
 fun AgregarGasto(
     categorias: List<Categoria>,
-    onCrearCategoria: (String) -> Categoria?,
     onGuardar: (Long, String, Int) -> Boolean,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier
@@ -41,9 +40,6 @@ fun AgregarGasto(
     var concepto by rememberSaveable { mutableStateOf("") }
     var categoriaId by rememberSaveable { mutableStateOf<Int?>(null) }
     var menuAbierto by remember { mutableStateOf(false) }
-    var mostrarNuevaCategoria by rememberSaveable { mutableStateOf(false) }
-    var nuevaCategoria by rememberSaveable { mutableStateOf("") }
-    var errorCategoria by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf("") }
     val seleccionada = categorias.firstOrNull { it.id == categoriaId }
     val forma = RoundedCornerShape(12.dp)
@@ -66,31 +62,31 @@ fun AgregarGasto(
                 OutlinedTextField(
                     value = monto,
                     onValueChange = { monto = it },
-                    label = { Text("Monto") },
-                    prefix = { Text("$ ") },
+                    placeholder = { Text("Monto") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     shape = forma,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Monto" }
                 )
                 OutlinedTextField(
                     value = concepto,
                     onValueChange = { concepto = it },
-                    label = { Text("Concepto") },
+                    placeholder = { Text("Concepto") },
                     singleLine = true,
                     shape = forma,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Concepto" }
                 )
                 Box {
                     OutlinedButton(
                         onClick = { menuAbierto = true },
+                        enabled = categorias.isNotEmpty(),
                         shape = forma,
                         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                     ) {
-                        Text(seleccionada?.nombre ?: "Categoría", modifier = Modifier.weight(1f))
+                        Text(seleccionada?.nombre ?: if (categorias.isEmpty()) "Sin categorías registradas" else "Categoría", modifier = Modifier.weight(1f))
                         Text("▾")
                     }
                     DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
@@ -103,14 +99,7 @@ fun AgregarGasto(
                                 }
                             )
                         }
-                        DropdownMenuItem(
-                            text = { Text("Nueva categoría") },
-                            onClick = {
-                                menuAbierto = false
-                                errorCategoria = ""
-                                mostrarNuevaCategoria = true
-                            }
-                        )
+
                     }
                 }
                 if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
@@ -130,40 +119,6 @@ fun AgregarGasto(
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp).width(180.dp).heightIn(min = 48.dp)
                 ) { Text("Guardar") }
             }
-        }
-        if (mostrarNuevaCategoria) {
-            AlertDialog(
-                onDismissRequest = { mostrarNuevaCategoria = false },
-                title = { Text("Nueva categoría") },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = nuevaCategoria,
-                            onValueChange = { nuevaCategoria = it },
-                            label = { Text("Nombre") },
-                            singleLine = true,
-                            shape = forma
-                        )
-                        if (errorCategoria.isNotEmpty()) Text(errorCategoria, color = MaterialTheme.colorScheme.error)
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        val creada = onCrearCategoria(nuevaCategoria.trim())
-                        if (creada == null) {
-                            errorCategoria = "Escribe un nombre válido que no esté registrado."
-                        } else {
-                            categoriaId = creada.id
-                            nuevaCategoria = ""
-                            error = ""
-                            mostrarNuevaCategoria = false
-                        }
-                    }) { Text("Crear") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { mostrarNuevaCategoria = false }) { Text("Cancelar") }
-                }
-            )
         }
     }
 }
