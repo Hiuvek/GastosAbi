@@ -1,11 +1,11 @@
 package com.example.lunes26oct
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,7 +61,7 @@ fun AgregarGasto(
                         modifier = Modifier.align(Alignment.CenterStart).semantics { contentDescription = "Volver" },
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         contentPadding = PaddingValues(0.dp)
-                    ) { Text("←", fontSize = 26.sp) }
+                    ) { IconoGasto(R.drawable.ic_volver) }
                     Text(
                         "Agregar gasto",
                         style = MaterialTheme.typography.titleLarge,
@@ -75,7 +75,7 @@ fun AgregarGasto(
                         value = monto,
                         onValueChange = { monto = it },
                         placeholder = { Text("0") },
-                        leadingIcon = { Text("$", fontSize = 24.sp) },
+                        leadingIcon = { IconoGasto(R.drawable.ic_monto) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         shape = forma,
@@ -97,10 +97,10 @@ fun AgregarGasto(
                             Box(
                                 modifier = Modifier.size(36.dp).background(Color(0xFFD1B8EC), RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center
-                            ) { IconoCategoria() }
+                            ) { IconoGasto(R.drawable.ic_categoria) }
                             Spacer(Modifier.width(12.dp))
                             Text(seleccionada?.nombre ?: if (categorias.isEmpty()) "Sin categorías registradas" else "Selecciona una categoría", modifier = Modifier.weight(1f))
-                            Text("▾")
+                            IconoGasto(R.drawable.ic_desplegar)
                         }
                         DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
                             categorias.forEach { categoria ->
@@ -122,7 +122,7 @@ fun AgregarGasto(
                         value = concepto,
                         onValueChange = { concepto = it },
                         placeholder = { Text("¿En qué gastaste?") },
-                        leadingIcon = { Text("T", fontSize = 24.sp) },
+                        leadingIcon = { IconoGasto(R.drawable.ic_concepto) },
                         singleLine = true,
                         shape = forma,
                         modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Concepto" }
@@ -149,19 +149,12 @@ fun AgregarGasto(
     }
 }
 
+// Reemplaza los PNG de res/drawable conservando sus nombres.
 @Composable
-private fun IconoCategoria() {
-    Canvas(modifier = Modifier.size(24.dp)) {
-        val color = Color(0xFF7E49B3)
-        val grosor = 2.dp.toPx()
-        fun punto(x: Float, y: Float) = Offset(size.width * x, size.height * y)
-        drawLine(color, punto(.08f, .15f), punto(.22f, .15f), grosor)
-        drawLine(color, punto(.22f, .15f), punto(.35f, .68f), grosor)
-        drawLine(color, punto(.28f, .3f), punto(.9f, .3f), grosor)
-        drawLine(color, punto(.9f, .3f), punto(.8f, .57f), grosor)
-        drawLine(color, punto(.8f, .57f), punto(.32f, .57f), grosor)
-        drawLine(color, punto(.35f, .68f), punto(.8f, .68f), grosor)
-        drawCircle(color, 2.dp.toPx(), punto(.4f, .84f))
-        drawCircle(color, 2.dp.toPx(), punto(.75f, .84f))
-    }
+private fun IconoGasto(@DrawableRes recurso: Int) {
+    Image(
+        painter = painterResource(recurso),
+        contentDescription = null,
+        modifier = Modifier.size(24.dp)
+    )
 }
