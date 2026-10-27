@@ -6,14 +6,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.dp
+import com.example.lunes26oct.domain.model.Categoria
 
 @Composable
-fun NuevaCategoria(onCerrar: () -> Unit, onGuardar: (String) -> Boolean) {
-    var nombre by rememberSaveable { mutableStateOf("") }
+fun NuevaCategoria(
+    onCerrar: () -> Unit,
+    onGuardar: (String) -> Boolean,
+    categoriaInicial: Categoria? = null
+) {
+    var nombre by rememberSaveable(categoriaInicial?.id) { mutableStateOf(categoriaInicial?.nombre.orEmpty()) }
     var error by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onCerrar,
-        title = { Text("Nueva categoria") },
+        title = { Text(if (categoriaInicial == null) "Nueva categoria" else "Editar categoria") },
         text = {
             Column {
                 OutlinedTextField(

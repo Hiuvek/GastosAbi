@@ -24,6 +24,8 @@ import com.example.lunes26oct.data.local.ModeloGastos
 
 import com.example.lunes26oct.data.repository.RepositorioGastosSqlite
 import com.example.lunes26oct.domain.usecase.GuardarGasto
+import com.example.lunes26oct.domain.usecase.EditarCategoria
+import com.example.lunes26oct.domain.usecase.EliminarCategoria
 import com.example.lunes26oct.domain.usecase.CrearCategoria
 import com.example.lunes26oct.ui.screens.categorias.Categorias
 import com.example.lunes26oct.ui.screens.categorias.NuevaCategoria
@@ -43,6 +45,8 @@ class MainActivity : ComponentActivity() {
         val guardarGasto = GuardarGasto(repositorio)
         val eliminarGasto = EliminarGasto(repositorio)
         val crearCategoria = CrearCategoria(repositorio)
+        val editarCategoria = EditarCategoria(repositorio)
+        val eliminarCategoria = EliminarCategoria(repositorio)
         enableEdgeToEdge()
         setContent {
             var gastos by remember { mutableStateOf(repositorio.leeGastos()) }
@@ -51,6 +55,9 @@ class MainActivity : ComponentActivity() {
             var seccion by rememberSaveable { mutableStateOf("inicio") }
             var categoriaDetalleId by rememberSaveable { mutableStateOf<Int?>(null) }
             var creandoCategoria by rememberSaveable { mutableStateOf(false) }
+            var editandoCategoriaId by rememberSaveable { mutableStateOf<Int?>(null) }
+            var eliminandoCategoriaId by rememberSaveable { mutableStateOf<Int?>(null) }
+            var errorEliminarCategoria by remember { mutableStateOf("") }
             val viendoLista = seccion == "gastos"
             val viendoCategorias = seccion == "categorias"
             var editandoId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -90,7 +97,10 @@ class MainActivity : ComponentActivity() {
                                 editandoId = null
                             },
                             onAgregar = {
-                                if (viendoCategorias && categoriaDetalleId == null) creandoCategoria = true
+                                if (viendoCategorias && categoriaDetalleId == null) {
+                                    editandoCategoriaId = null
+                                    creandoCategoria = true
+                                }
                                 else {
                                     editandoId = null
                                     agregando = true
@@ -152,8 +162,16 @@ class MainActivity : ComponentActivity() {
                             categorias = categorias,
                             gastos = gastos,
                             onVolver = { seccion = "inicio" },
-                            onAgregar = { creandoCategoria = true },
+                            onAgregar = { editandoCategoriaId = null; creandoCategoria = true },
                             onCategoria = { categoriaDetalleId = it.id },
+                            onEditar = { categoria ->
+                                editandoCategoriaId = categoria.id
+                                creandoCategoria = true
+                            },
+                            onEliminar = { categoria ->
+                                eliminandoCategoriaId = categoria.id
+                                errorEliminarCategoria = ""
+                            },
                             modifier = Modifier.padding(innerPadding)
                         )
                     } else {
@@ -169,14 +187,47 @@ class MainActivity : ComponentActivity() {
                 }
                 if (creandoCategoria) {
                     NuevaCategoria(
-                        onCerrar = { creandoCategoria = false },
+                        categoriaInicial = categorias.firstOrNull { it.id == editandoCategoriaId },
+                        onCerrar = { creandoCategoria = false; editandoCategoriaId = null },
                         onGuardar = { nombre ->
-                            val guardada = crearCategoria(nombre)
+                            val actual = categorias.firstOrNull { it.id == editandoCategoriaId }
+                            val guardada = if (actual == null) crearCategoria(nombre)
+                                else editarCategoria(actual.copy(nombre = nombre))
                             if (guardada) {
                                 categorias = repositorio.leeCategorias()
                                 creandoCategoria = false
+                                editandoCategoriaId = null
                             }
                             guardada
+                        }
+                    )
+                }
+                val categoriaAEliminar = categorias.firstOrNull { it.id == eliminandoCategoriaId }
+                if (categoriaAEliminar != null) {
+                    val tieneGastos = gastos.any { it.categoriaId == categoriaAEliminar.id }
+                    AlertDialog(
+                        onDismissRequest = { eliminandoCategoriaId = null },
+                        title = { Text(if (tieneGastos) "Categoria con gastos" else "Eliminar categoria") },
+                        text = {
+                            Text(
+                                if (tieneGastos) "No puedes eliminar ${categoriaAEliminar.nombre} porque tiene gastos asociados."
+                                else errorEliminarCategoria.ifEmpty { "¿Eliminar ${categoriaAEliminar.nombre}? Esta accion no se puede deshacer." }
+                            )
+                        },
+                        confirmButton = {
+                            if (tieneGastos) {
+                                TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Entendido") }
+                            } else {
+                                TextButton(onClick = {
+                                    if (eliminarCategoria(categoriaAEliminar.id)) {
+                                        categorias = repositorio.leeCategorias()
+                                        eliminandoCategoriaId = null
+                                    } else errorEliminarCategoria = "No se pudo eliminar. Revisa si tiene gastos asociados."
+                                }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                            }
+                        },
+                        dismissButton = {
+                            if (!tieneGastos) TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Cancelar") }
                         }
                     )
                 }
