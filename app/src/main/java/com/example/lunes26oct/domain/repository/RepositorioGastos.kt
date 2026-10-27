@@ -4,6 +4,9 @@ import com.example.lunes26oct.domain.model.Categoria
 import com.example.lunes26oct.domain.model.Gasto
 
 interface RepositorioGastos {
+    fun insertaCategoria(categoria: Categoria): Boolean
+    fun actualizaCategoria(categoria: Categoria): Boolean
+    fun eliminaCategoria(id: Int): Boolean
     fun leeCategorias(): List<Categoria>
     fun leeGastos(): List<Gasto>
     fun insertaGasto(gasto: Gasto): Boolean
