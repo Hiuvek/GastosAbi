@@ -33,10 +33,11 @@ fun ListaGastos(
 ) {
     var busqueda by rememberSaveable { mutableStateOf("") }
     val nombres = categorias.associate { it.id to it.nombre }
+    val terminoBusqueda = busqueda.trim()
     val visibles = gastos.filter {
-        busqueda.isBlank() ||
-            it.descripcion.orEmpty().contains(busqueda.trim(), ignoreCase = true) ||
-            nombres[it.categoriaId].orEmpty().contains(busqueda.trim(), ignoreCase = true)
+        terminoBusqueda.isEmpty() ||
+            it.descripcion.orEmpty().contains(terminoBusqueda, ignoreCase = true) ||
+            nombres[it.categoriaId].orEmpty().contains(terminoBusqueda, ignoreCase = true)
     }
     val total = visibles.fold(BigDecimal.ZERO) { suma, gasto -> suma + gasto.monto.toBigDecimal() }
 
