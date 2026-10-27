@@ -62,8 +62,24 @@ class MainActivity : ComponentActivity() {
             var gastoInicial by remember { mutableStateOf<Gasto?>(null) }
             var categoriaInicial by remember { mutableStateOf<Categoria?>(null) }
 
+            fun limpiarEdicionGasto() {
+                editandoId = null
+                gastoInicial = null
+            }
+            fun cerrarFormularioGasto() {
+                agregando = false
+                limpiarEdicionGasto()
+            }
+            fun limpiarEdicionCategoria() {
+                editandoCategoriaId = null
+                categoriaInicial = null
+            }
+            fun cerrarFormularioCategoria() {
+                creandoCategoria = false
+                limpiarEdicionCategoria()
+            }
             suspend fun recargar() {
-                // El repositorio consulta en IO; el estado se publica junto en el hilo principal.
+                // El repositorio consulta en IO y publica el estado en el hilo principal.
                 val nuevasCategorias = repositorio.leeCategorias()
                 val nuevosGastos = repositorio.leeGastos()
                 val nuevoResumen = repositorio.resumenCategorias()
@@ -95,32 +111,26 @@ class MainActivity : ComponentActivity() {
             fun abrirCategoria() {
                 if (ocupado || cargando) return
                 seccion = "categorias"
-                agregando = false
-                editandoId = null
-                gastoInicial = null
+                cerrarFormularioGasto()
                 categoriaDetalleId = null
-                editandoCategoriaId = null
-                categoriaInicial = null
+                limpiarEdicionCategoria()
                 creandoCategoria = true
             }
             fun abrirGasto() {
                 if (ocupado || cargando) return
-                editandoId = null
-                gastoInicial = null
+                limpiarEdicionGasto()
                 agregando = true
             }
             fun volver() {
                 if (ocupado) return
-                if (agregando) { agregando = false; editandoId = null; gastoInicial = null }
+                if (agregando) cerrarFormularioGasto()
                 else if (categoriaDetalleId != null) categoriaDetalleId = null
                 else seccion = "inicio"
             }
             fun navegar(destino: String) {
                 if (ocupado || cargando) return
                 seccion = destino
-                agregando = false
-                editandoId = null
-                gastoInicial = null
+                cerrarFormularioGasto()
                 categoriaDetalleId = null
             }
             val editar: (Gasto) -> Unit = { gasto ->
@@ -170,9 +180,7 @@ class MainActivity : ComponentActivity() {
                                         if (guardado) {
                                             recargar()
                                             mensaje = if (editandoId == null) "Gasto guardado." else "Gasto actualizado."
-                                            editandoId = null
-                                            gastoInicial = null
-                                            agregando = false
+                                            cerrarFormularioGasto()
                                         }
                                         guardado
                                     }
@@ -215,7 +223,7 @@ class MainActivity : ComponentActivity() {
                     if (creandoCategoria && !cargando) {
                         NuevaCategoria(
                             categoriaInicial = categoriaInicial,
-                            onCerrar = { if (!ocupado) { creandoCategoria = false; editandoCategoriaId = null; categoriaInicial = null } },
+                            onCerrar = { if (!ocupado) cerrarFormularioCategoria() },
                             onGuardar = { nombre, icono ->
                                 operar {
                                     val actual = categoriaInicial
@@ -226,14 +234,11 @@ class MainActivity : ComponentActivity() {
                                         val id = actual?.id ?: categorias.firstOrNull { it.nombre == nombre }?.id
                                         if (id != null) preferencias.guardar(id, icono)
                                         iconos = preferencias.leer()
-                                        creandoCategoria = false
-                                        editandoCategoriaId = null
-                                        categoriaInicial = null
+                                        cerrarFormularioCategoria()
                                         if (actual == null) {
                                             seccion = "gastos"
                                             categoriaDetalleId = null
-                                            editandoId = null
-                                            gastoInicial = null
+                                            limpiarEdicionGasto()
                                             agregando = true
                                         }
                                     }
