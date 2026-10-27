@@ -1,4 +1,4 @@
-package com.example.lunes26oct.ui.theme
+package com.example.lunes26oct.domain.model
 data class Gasto(
     val id: Int = 0,
     val categoriaId: Int,

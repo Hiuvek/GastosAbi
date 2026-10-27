@@ -1,4 +1,4 @@
-package com.example.lunes26oct
+package com.example.lunes26oct.ui.screens.gastos
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -14,8 +14,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.lunes26oct.ui.theme.Categoria
-import com.example.lunes26oct.ui.theme.Gasto
+import com.example.lunes26oct.domain.model.Categoria
+import com.example.lunes26oct.domain.model.Gasto
+import com.example.lunes26oct.R
+import com.example.lunes26oct.ui.components.FilaGasto
+import com.example.lunes26oct.ui.util.formatoMonto
 import java.math.BigDecimal
 
 @Composable
@@ -52,7 +55,7 @@ fun ListaGastos(
         OutlinedTextField(
             value = busqueda,
             onValueChange = { busqueda = it },
-            label = { Text("Buscar concepto o categoria") },
+            placeholder = { Text("Buscar concepto o categoria") },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),

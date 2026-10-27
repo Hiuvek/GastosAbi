@@ -1,9 +1,8 @@
-package com.example.lunes26oct
+package com.example.lunes26oct.ui.screens.gastos
 
+import com.example.lunes26oct.R
+import com.example.lunes26oct.ui.components.IconoGasto
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.rememberScrollState
@@ -15,13 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.lunes26oct.ui.theme.Categoria
-import com.example.lunes26oct.ui.theme.Gasto
+import com.example.lunes26oct.domain.model.Categoria
+import com.example.lunes26oct.domain.model.Gasto
 
 @Composable
 fun AgregarGasto(
@@ -135,15 +133,4 @@ fun AgregarGasto(
             ) { Text(if (gastoInicial == null) "Guardar gasto" else "Guardar cambios", fontWeight = FontWeight.SemiBold) }
         }
     }
-}
-
-// Reemplaza los PNG de res/drawable conservando sus nombres.
-@Composable
-private fun IconoGasto(@DrawableRes recurso: Int) {
-    Image(
-        painter = painterResource(recurso),
-        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-        contentDescription = null,
-        modifier = Modifier.size(24.dp)
-    )
 }

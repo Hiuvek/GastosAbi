@@ -17,10 +17,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.example.lunes26oct.ui.theme.Gasto
+import com.example.lunes26oct.domain.model.Gasto
 import androidx.compose.material3.MaterialTheme
 import com.example.lunes26oct.ui.theme.Lunes26octTheme
-import com.example.lunes26oct.ui.theme.ModeloGastos
+import com.example.lunes26oct.data.local.ModeloGastos
+
+import com.example.lunes26oct.data.repository.RepositorioGastosSqlite
+import com.example.lunes26oct.domain.usecase.GuardarGasto
+import com.example.lunes26oct.domain.usecase.EliminarGasto
+import com.example.lunes26oct.ui.components.BarraInicio
+import com.example.lunes26oct.ui.screens.inicio.PantallaPrincipal
+import com.example.lunes26oct.ui.screens.gastos.AgregarGasto
+import com.example.lunes26oct.ui.screens.gastos.ListaGastos
 
 class MainActivity : ComponentActivity() {
     private lateinit var modelo: ModeloGastos
@@ -28,9 +36,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         modelo = ModeloGastos(applicationContext)
+        val repositorio = RepositorioGastosSqlite(modelo)
+        val guardarGasto = GuardarGasto(repositorio)
+        val eliminarGasto = EliminarGasto(repositorio)
         enableEdgeToEdge()
         setContent {
-            var gastos by remember { mutableStateOf(modelo.leeGastos()) }
+            var gastos by remember { mutableStateOf(repositorio.leeGastos()) }
             var mensaje by remember { mutableStateOf("") }
             var agregando by rememberSaveable { mutableStateOf(false) }
             var viendoLista by rememberSaveable { mutableStateOf(false) }
@@ -45,7 +56,7 @@ class MainActivity : ComponentActivity() {
                 eliminandoId = gasto.id
                 errorEliminar = ""
             }
-            val categorias = remember { modelo.leeCategorias() }
+            val categorias = remember { repositorio.leeCategorias() }
             BackHandler(enabled = agregando || viendoLista) {
                 if (agregando) {
                     agregando = false
@@ -86,10 +97,9 @@ class MainActivity : ComponentActivity() {
                                     descripcion = concepto,
                                     monto = monto
                                 )
-                                val guardado = if (editandoId == null) modelo.insertaGasto(gasto)
-                                    else modelo.actualizaGasto(gasto)
+                                val guardado = guardarGasto(gasto)
                                 if (guardado) {
-                                    gastos = modelo.leeGastos()
+                                    gastos = repositorio.leeGastos()
                                     mensaje = if (editandoId == null) "Gasto guardado." else "Gasto actualizado."
                                     editandoId = null
                                     agregando = false
@@ -132,8 +142,8 @@ class MainActivity : ComponentActivity() {
                         },
                         confirmButton = {
                             TextButton(onClick = {
-                                if (modelo.eliminaGasto(pendiente.id)) {
-                                    gastos = modelo.leeGastos()
+                                if (eliminarGasto(pendiente.id)) {
+                                    gastos = repositorio.leeGastos()
                                     mensaje = "Gasto eliminado."
                                     eliminandoId = null
                                 } else errorEliminar = "No se pudo eliminar el gasto. Intentalo de nuevo."
