@@ -27,7 +27,11 @@ fun BarraInicio(
 ) {
     Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp) {
         Row(
-            modifier = Modifier.fillMaxWidth().navigationBarsPadding().height(80.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .height(88.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             BotonSeccion("Inicio", R.drawable.ic_inicio, !agregando && !viendoLista && !viendoCategorias, onInicio, Modifier.weight(1f))
@@ -55,8 +59,11 @@ fun BarraInicio(
 @Composable
 private fun BotonSeccion(texto: String, @DrawableRes icono: Int, seleccionado: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val color = if (seleccionado) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    TextButton(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(0.dp)) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    TextButton(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             Image(painterResource(icono), contentDescription = null, colorFilter = ColorFilter.tint(color), modifier = Modifier.size(24.dp))
             Text(texto, color = color, fontSize = 12.sp, maxLines = 1)
         }
