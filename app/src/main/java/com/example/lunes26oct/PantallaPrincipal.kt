@@ -25,7 +25,6 @@ fun PantallaPrincipal(
     gastos: List<Gasto>,
     categorias: List<Categoria>,
     mensaje: String,
-    onVerGastos: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val total = gastos.fold(BigDecimal.ZERO) { suma, gasto -> suma + gasto.monto.toBigDecimal() }
@@ -58,10 +57,7 @@ fun PantallaPrincipal(
         }
         if (mensaje.isNotEmpty()) item { Text(mensaje, color = MaterialTheme.colorScheme.primary) }
         item {
-            Column {
-                Text("Tus ultimos gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                TextButton(onClick = onVerGastos) { Text("Ver todos") }
-            }
+            Text("Tus ultimos gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
         }
         if (gastos.isEmpty()) {
             item {
@@ -88,17 +84,40 @@ private fun DatoInicio(titulo: String, valor: String, modifier: Modifier) {
 internal fun formatoMonto(monto: BigDecimal): String = "$ " + NumberFormat.getIntegerInstance().format(monto)
 
 @Composable
-fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit) {
+fun BarraInicio(
+    agregando: Boolean,
+    viendoLista: Boolean,
+    onInicio: () -> Unit,
+    onAgregar: () -> Unit,
+    onGastos: () -> Unit
+) {
     Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp) {
         Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().height(80.dp)) {
             TextButton(
                 onClick = onInicio,
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 20.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando || viendoLista) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(R.drawable.ic_inicio), colorFilter = ColorFilter.tint(if (agregando) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
+                    Image(painterResource(R.drawable.ic_inicio), colorFilter = ColorFilter.tint(if (agregando || viendoLista) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
                     Text("Inicio")
+                }
+            }
+            TextButton(
+                onClick = onGastos,
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 20.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = if (viendoLista && !agregando) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painterResource(R.drawable.ic_gastos),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(if (viendoLista && !agregando) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant),
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Text("Gastos")
                 }
             }
             FilledIconButton(

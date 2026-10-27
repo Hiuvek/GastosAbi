@@ -43,11 +43,16 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         BarraInicio(
                             agregando = agregando,
+                            viendoLista = viendoLista,
                             onInicio = {
                                 agregando = false
                                 viendoLista = false
                             },
-                            onAgregar = { agregando = true }
+                            onAgregar = { agregando = true },
+                            onGastos = {
+                                agregando = false
+                                viendoLista = true
+                            }
                         )
                     }
                 ) { innerPadding ->
@@ -80,7 +85,6 @@ class MainActivity : ComponentActivity() {
                             gastos = gastos,
                             categorias = categorias,
                             mensaje = mensaje,
-                            onVerGastos = { viendoLista = true },
                             modifier = Modifier.padding(innerPadding)
                         )
                     }
