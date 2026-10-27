@@ -149,11 +149,10 @@ class MainActivity : ComponentActivity() {
                                 agregando = agregando,
                                 viendoLista = seccion == "gastos",
                                 viendoCategorias = seccion == "categorias",
-                                agregandoCategoria = seccion == "categorias" && !agregando,
                                 onInicio = { navegar("inicio") },
                                 onGastos = { navegar("gastos") },
                                 onCategorias = { navegar("categorias") },
-                                onAgregar = { if (seccion == "categorias" && !agregando) abrirCategoria() else abrirGasto() }
+                                onAgregar = { abrirGasto() }
                             )
                         }
                     ) { padding ->

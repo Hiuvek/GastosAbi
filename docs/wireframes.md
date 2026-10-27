@@ -27,7 +27,7 @@ Sin categorias: indicar que se creen en Categorias con +. Sin gastos: total 0.00
 [Inicio] [Gastos] [+] [Categorias]
 ```
 
-El + abre Nueva categoria: nombre, selector de icono, Guardar y Cancelar. El menu izquierdo permite editar o eliminar; se explica si existen gastos y se bloquea la eliminacion. Tocar una categoria abre sus gastos. Guardar una categoria nueva conduce a Agregar gasto. Sin categorias: mensaje para pulsar +.
+El + del encabezado abre Nueva categoria: nombre, selector de icono, Guardar y Cancelar. El menu izquierdo permite editar o eliminar; se explica si existen gastos y se bloquea la eliminacion. Tocar una categoria abre sus gastos. Guardar una categoria nueva conduce a Agregar gasto. Sin categorias: mensaje para pulsar el + del encabezado. El + central de la barra inferior siempre abre Agregar gasto, incluso desde Categorias.
 
 ## Gastos
 
