@@ -1,6 +1,13 @@
 package com.example.lunes26oct.ui.screens.categorias
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
+import com.example.lunes26oct.ui.components.LocalIconosCategoria
+import com.example.lunes26oct.ui.components.OpcionIconoCategoria
+import com.example.lunes26oct.ui.components.SelectorIconoCategoria
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,16 +18,21 @@ import com.example.lunes26oct.domain.model.Categoria
 @Composable
 fun NuevaCategoria(
     onCerrar: () -> Unit,
-    onGuardar: (String) -> Boolean,
+    onGuardar: (String, String) -> Boolean,
     categoriaInicial: Categoria? = null
 ) {
     var nombre by rememberSaveable(categoriaInicial?.id) { mutableStateOf(categoriaInicial?.nombre.orEmpty()) }
+    val iconoInicial = OpcionIconoCategoria.desdeClave(LocalIconosCategoria.current[categoriaInicial?.id]).clave
+    var icono by rememberSaveable(categoriaInicial?.id) { mutableStateOf(iconoInicial) }
     var error by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onCerrar,
         title = { Text(if (categoriaInicial == null) "Nueva categoria" else "Editar categoria") },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it; error = "" },
@@ -29,6 +41,7 @@ fun NuevaCategoria(
                     shape = RoundedCornerShape(16.dp),
                     isError = error.isNotEmpty()
                 )
+                SelectorIconoCategoria(icono) { icono = it }
                 if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
             }
         },
@@ -36,7 +49,7 @@ fun NuevaCategoria(
             TextButton(onClick = {
                 error = when {
                     nombre.isBlank() -> "Escribe un nombre."
-                    !onGuardar(nombre.trim()) -> "No se pudo guardar. Revisa que el nombre no este registrado."
+                    !onGuardar(nombre.trim(), icono) -> "No se pudo guardar. Revisa que el nombre no este registrado."
                     else -> ""
                 }
             }) { Text("Guardar") }

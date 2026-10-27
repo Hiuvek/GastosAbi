@@ -2,6 +2,7 @@ package com.example.lunes26oct.ui.screens.gastos
 
 import com.example.lunes26oct.R
 import com.example.lunes26oct.ui.components.IconoGasto
+import com.example.lunes26oct.ui.components.IconoCategoria
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.ui.text.font.FontWeight
@@ -84,7 +85,7 @@ fun AgregarGasto(
                         Box(
                             modifier = Modifier.size(36.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
-                        ) { IconoGasto(R.drawable.ic_categoria) }
+                        ) { IconoCategoria(seleccionada?.id, Modifier.size(24.dp)) }
                         Spacer(Modifier.width(12.dp))
                         Text(seleccionada?.nombre ?: if (categorias.isEmpty()) "Sin categorías registradas" else "Selecciona una categoría", modifier = Modifier.weight(1f))
                         IconoGasto(R.drawable.ic_desplegar)
@@ -93,6 +94,7 @@ fun AgregarGasto(
                         categorias.forEach { categoria ->
                             DropdownMenuItem(
                                 text = { Text(categoria.nombre) },
+                                leadingIcon = { IconoCategoria(categoria.id, Modifier.size(24.dp)) },
                                 onClick = {
                                     categoriaId = categoria.id
                                     menuAbierto = false

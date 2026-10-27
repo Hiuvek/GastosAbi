@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.lunes26oct.ui.components.IconoCategoria
 import com.example.lunes26oct.R
 import com.example.lunes26oct.domain.model.Categoria
 import com.example.lunes26oct.domain.model.Gasto
@@ -77,7 +78,7 @@ fun Categorias(
                             }
                         }
                         Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
-                            Image(painterResource(R.drawable.ic_categoria), null, Modifier.size(28.dp), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary))
+                            IconoCategoria(categoria.id)
                         }
                         Column(Modifier.weight(1f)) {
                             Text(categoria.nombre, fontWeight = FontWeight.SemiBold)

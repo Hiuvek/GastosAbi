@@ -1,6 +1,9 @@
 package com.example.lunes26oct
 
 import android.os.Bundle
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.lunes26oct.data.local.PreferenciasIconosCategoria
+import com.example.lunes26oct.ui.components.LocalIconosCategoria
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +45,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         modelo = ModeloGastos(applicationContext)
         val repositorio = RepositorioGastosSqlite(modelo)
+        val preferenciasIconos = PreferenciasIconosCategoria(applicationContext)
         val guardarGasto = GuardarGasto(repositorio)
         val eliminarGasto = EliminarGasto(repositorio)
         val crearCategoria = CrearCategoria(repositorio)
@@ -49,6 +53,7 @@ class MainActivity : ComponentActivity() {
         val eliminarCategoria = EliminarCategoria(repositorio)
         enableEdgeToEdge()
         setContent {
+            var iconosCategorias by remember { mutableStateOf(preferenciasIconos.leer()) }
             var gastos by remember { mutableStateOf(repositorio.leeGastos()) }
             var mensaje by remember { mutableStateOf("") }
             var agregando by rememberSaveable { mutableStateOf(false) }
@@ -81,182 +86,191 @@ class MainActivity : ComponentActivity() {
             }
 
             Lunes26octTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background,
-                    bottomBar = {
-                        BarraInicio(
-                            agregando = agregando,
-                            viendoLista = viendoLista,
-                            viendoCategorias = viendoCategorias,
-                            agregandoCategoria = viendoCategorias,
-                            onInicio = {
-                                agregando = false
-                                seccion = "inicio"
-                                categoriaDetalleId = null
-                                editandoId = null
-                            },
-                            onAgregar = {
-                                if (viendoCategorias) {
-                                    editandoCategoriaId = null
-                                    creandoCategoria = true
-                                }
-                                else {
-                                    editandoId = null
-                                    agregando = true
-                                }
-                            },
-                            onGastos = {
-                                agregando = false
-                                seccion = "gastos"
-                                categoriaDetalleId = null
-                                editandoId = null
-                            },
-                            onCategorias = {
-                                seccion = "categorias"
-                                categoriaDetalleId = null
-                                agregando = false
-                                editandoId = null
-                            }
-                        )
-                    }
-                ) { innerPadding ->
-                    if (agregando) {
-                        AgregarGasto(
-                            categorias = categorias,
-                            gastoInicial = gastos.firstOrNull { it.id == editandoId },
-                            onGuardar = { monto, concepto, categoriaId ->
-                                val gasto = Gasto(
-                                    id = editandoId ?: 0,
-                                    categoriaId = categoriaId,
-                                    descripcion = concepto,
-                                    monto = monto
-                                )
-                                val guardado = guardarGasto(gasto)
-                                if (guardado) {
-                                    gastos = repositorio.leeGastos()
-                                    mensaje = if (editandoId == null) "Gasto guardado." else "Gasto actualizado."
-                                    editandoId = null
+                CompositionLocalProvider(LocalIconosCategoria provides iconosCategorias) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        containerColor = MaterialTheme.colorScheme.background,
+                        bottomBar = {
+                            BarraInicio(
+                                agregando = agregando,
+                                viendoLista = viendoLista,
+                                viendoCategorias = viendoCategorias,
+                                agregandoCategoria = viendoCategorias,
+                                onInicio = {
                                     agregando = false
+                                    seccion = "inicio"
+                                    categoriaDetalleId = null
+                                    editandoId = null
+                                },
+                                onAgregar = {
+                                    if (viendoCategorias) {
+                                        editandoCategoriaId = null
+                                        creandoCategoria = true
+                                    }
+                                    else {
+                                        editandoId = null
+                                        agregando = true
+                                    }
+                                },
+                                onGastos = {
+                                    agregando = false
+                                    seccion = "gastos"
+                                    categoriaDetalleId = null
+                                    editandoId = null
+                                },
+                                onCategorias = {
+                                    seccion = "categorias"
+                                    categoriaDetalleId = null
+                                    agregando = false
+                                    editandoId = null
                                 }
-                                guardado
-                            },
-                            onVolver = { agregando = false; editandoId = null },
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                    } else if (viendoLista || categoriaDetalleId != null) {
-                        ListaGastos(
-                            gastos = if (categoriaDetalleId == null) gastos else gastos.filter { it.categoriaId == categoriaDetalleId },
-                            categorias = categorias,
-                            onEditar = editar,
-                            onEliminar = eliminar,
-                            onVolver = {
-                                if (categoriaDetalleId != null) categoriaDetalleId = null
-                                else seccion = "inicio"
-                            },
-                            titulo = categorias.firstOrNull { it.id == categoriaDetalleId }?.nombre ?: "Lista de gastos",
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                    } else if (viendoCategorias) {
-                        Categorias(
-                            categorias = categorias,
-                            gastos = gastos,
-                            onVolver = { seccion = "inicio" },
-                            onAgregar = { editandoCategoriaId = null; creandoCategoria = true },
-                            onCategoria = { categoriaDetalleId = it.id },
-                            onEditar = { categoria ->
-                                editandoCategoriaId = categoria.id
-                                creandoCategoria = true
-                            },
-                            onEliminar = { categoria ->
-                                eliminandoCategoriaId = categoria.id
-                                errorEliminarCategoria = ""
-                            },
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                    } else {
-                        PantallaPrincipal(
-                            gastos = gastos,
-                            categorias = categorias,
-                            onEditar = editar,
-                            onEliminar = eliminar,
-                            mensaje = mensaje,
-                            modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                    ) { innerPadding ->
+                        if (agregando) {
+                            AgregarGasto(
+                                categorias = categorias,
+                                gastoInicial = gastos.firstOrNull { it.id == editandoId },
+                                onGuardar = { monto, concepto, categoriaId ->
+                                    val gasto = Gasto(
+                                        id = editandoId ?: 0,
+                                        categoriaId = categoriaId,
+                                        descripcion = concepto,
+                                        monto = monto
+                                    )
+                                    val guardado = guardarGasto(gasto)
+                                    if (guardado) {
+                                        gastos = repositorio.leeGastos()
+                                        mensaje = if (editandoId == null) "Gasto guardado." else "Gasto actualizado."
+                                        editandoId = null
+                                        agregando = false
+                                    }
+                                    guardado
+                                },
+                                onVolver = { agregando = false; editandoId = null },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        } else if (viendoLista || categoriaDetalleId != null) {
+                            ListaGastos(
+                                gastos = if (categoriaDetalleId == null) gastos else gastos.filter { it.categoriaId == categoriaDetalleId },
+                                categorias = categorias,
+                                onEditar = editar,
+                                onEliminar = eliminar,
+                                onVolver = {
+                                    if (categoriaDetalleId != null) categoriaDetalleId = null
+                                    else seccion = "inicio"
+                                },
+                                titulo = categorias.firstOrNull { it.id == categoriaDetalleId }?.nombre ?: "Lista de gastos",
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        } else if (viendoCategorias) {
+                            Categorias(
+                                categorias = categorias,
+                                gastos = gastos,
+                                onVolver = { seccion = "inicio" },
+                                onAgregar = { editandoCategoriaId = null; creandoCategoria = true },
+                                onCategoria = { categoriaDetalleId = it.id },
+                                onEditar = { categoria ->
+                                    editandoCategoriaId = categoria.id
+                                    creandoCategoria = true
+                                },
+                                onEliminar = { categoria ->
+                                    eliminandoCategoriaId = categoria.id
+                                    errorEliminarCategoria = ""
+                                },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        } else {
+                            PantallaPrincipal(
+                                gastos = gastos,
+                                categorias = categorias,
+                                onEditar = editar,
+                                onEliminar = eliminar,
+                                mensaje = mensaje,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                    }
+                    if (creandoCategoria) {
+                        NuevaCategoria(
+                            categoriaInicial = categorias.firstOrNull { it.id == editandoCategoriaId },
+                            onCerrar = { creandoCategoria = false; editandoCategoriaId = null },
+                            onGuardar = { nombre, icono ->
+                                val actual = categorias.firstOrNull { it.id == editandoCategoriaId }
+                                val guardada = if (actual == null) crearCategoria(nombre)
+                                    else actual.nombre == nombre || editarCategoria(actual.copy(nombre = nombre))
+                                if (guardada) {
+                                    categorias = repositorio.leeCategorias()
+                                    val guardadaId = actual?.id ?: categorias.firstOrNull { it.nombre == nombre }?.id
+                                    if (guardadaId != null) {
+                                        preferenciasIconos.guardar(guardadaId, icono)
+                                        iconosCategorias = preferenciasIconos.leer()
+                                    }
+                                    creandoCategoria = false
+                                    editandoCategoriaId = null
+                                }
+                                guardada
+                            }
                         )
                     }
-                }
-                if (creandoCategoria) {
-                    NuevaCategoria(
-                        categoriaInicial = categorias.firstOrNull { it.id == editandoCategoriaId },
-                        onCerrar = { creandoCategoria = false; editandoCategoriaId = null },
-                        onGuardar = { nombre ->
-                            val actual = categorias.firstOrNull { it.id == editandoCategoriaId }
-                            val guardada = if (actual == null) crearCategoria(nombre)
-                                else editarCategoria(actual.copy(nombre = nombre))
-                            if (guardada) {
-                                categorias = repositorio.leeCategorias()
-                                creandoCategoria = false
-                                editandoCategoriaId = null
+                    val categoriaAEliminar = categorias.firstOrNull { it.id == eliminandoCategoriaId }
+                    if (categoriaAEliminar != null) {
+                        val tieneGastos = gastos.any { it.categoriaId == categoriaAEliminar.id }
+                        AlertDialog(
+                            onDismissRequest = { eliminandoCategoriaId = null },
+                            title = { Text(if (tieneGastos) "Categoria con gastos" else "Eliminar categoria") },
+                            text = {
+                                Text(
+                                    if (tieneGastos) "No puedes eliminar ${categoriaAEliminar.nombre} porque tiene gastos asociados."
+                                    else errorEliminarCategoria.ifEmpty { "¿Eliminar ${categoriaAEliminar.nombre}? Esta accion no se puede deshacer." }
+                                )
+                            },
+                            confirmButton = {
+                                if (tieneGastos) {
+                                    TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Entendido") }
+                                } else {
+                                    TextButton(onClick = {
+                                        if (eliminarCategoria(categoriaAEliminar.id)) {
+                                            preferenciasIconos.eliminar(categoriaAEliminar.id)
+                                            iconosCategorias = preferenciasIconos.leer()
+                                            categorias = repositorio.leeCategorias()
+                                            eliminandoCategoriaId = null
+                                        } else errorEliminarCategoria = "No se pudo eliminar. Revisa si tiene gastos asociados."
+                                    }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                                }
+                            },
+                            dismissButton = {
+                                if (!tieneGastos) TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Cancelar") }
                             }
-                            guardada
-                        }
-                    )
-                }
-                val categoriaAEliminar = categorias.firstOrNull { it.id == eliminandoCategoriaId }
-                if (categoriaAEliminar != null) {
-                    val tieneGastos = gastos.any { it.categoriaId == categoriaAEliminar.id }
-                    AlertDialog(
-                        onDismissRequest = { eliminandoCategoriaId = null },
-                        title = { Text(if (tieneGastos) "Categoria con gastos" else "Eliminar categoria") },
-                        text = {
-                            Text(
-                                if (tieneGastos) "No puedes eliminar ${categoriaAEliminar.nombre} porque tiene gastos asociados."
-                                else errorEliminarCategoria.ifEmpty { "¿Eliminar ${categoriaAEliminar.nombre}? Esta accion no se puede deshacer." }
-                            )
-                        },
-                        confirmButton = {
-                            if (tieneGastos) {
-                                TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Entendido") }
-                            } else {
+                        )
+                    }
+                    val pendiente = gastos.firstOrNull { it.id == eliminandoId }
+                    if (pendiente != null) {
+                        AlertDialog(
+                            onDismissRequest = { eliminandoId = null },
+                            title = { Text("Eliminar gasto") },
+                            text = {
+                                Text(
+                                    if (errorEliminar.isNotEmpty()) errorEliminar
+                                    else "¿Eliminar ${pendiente.descripcion?.takeIf { it.isNotBlank() } ?: "este gasto"}? Esta accion no se puede deshacer."
+                                )
+                            },
+                            confirmButton = {
                                 TextButton(onClick = {
-                                    if (eliminarCategoria(categoriaAEliminar.id)) {
-                                        categorias = repositorio.leeCategorias()
-                                        eliminandoCategoriaId = null
-                                    } else errorEliminarCategoria = "No se pudo eliminar. Revisa si tiene gastos asociados."
+                                    if (eliminarGasto(pendiente.id)) {
+                                        gastos = repositorio.leeGastos()
+                                        mensaje = "Gasto eliminado."
+                                        eliminandoId = null
+                                    } else errorEliminar = "No se pudo eliminar el gasto. Intentalo de nuevo."
                                 }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { eliminandoId = null }) { Text("Cancelar") }
                             }
-                        },
-                        dismissButton = {
-                            if (!tieneGastos) TextButton(onClick = { eliminandoCategoriaId = null }) { Text("Cancelar") }
-                        }
-                    )
-                }
-                val pendiente = gastos.firstOrNull { it.id == eliminandoId }
-                if (pendiente != null) {
-                    AlertDialog(
-                        onDismissRequest = { eliminandoId = null },
-                        title = { Text("Eliminar gasto") },
-                        text = {
-                            Text(
-                                if (errorEliminar.isNotEmpty()) errorEliminar
-                                else "¿Eliminar ${pendiente.descripcion?.takeIf { it.isNotBlank() } ?: "este gasto"}? Esta accion no se puede deshacer."
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                if (eliminarGasto(pendiente.id)) {
-                                    gastos = repositorio.leeGastos()
-                                    mensaje = "Gasto eliminado."
-                                    eliminandoId = null
-                                } else errorEliminar = "No se pudo eliminar el gasto. Intentalo de nuevo."
-                            }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { eliminandoId = null }) { Text("Cancelar") }
-                        }
-                    )
-                }
+                        )
+                    }
 
+                }
             }
         }
     }
