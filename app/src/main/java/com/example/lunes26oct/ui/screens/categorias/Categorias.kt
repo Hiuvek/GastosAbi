@@ -57,6 +57,7 @@ fun Categorias(
             items(categorias, key = { it.id }) { categoria ->
                 var menuAbierto by remember(categoria.id) { mutableStateOf(false) }
                 val registros = relacionados[categoria.id].orEmpty()
+                val cantidadGastos = registros.size
                 val total = (totales[categoria.nombre] ?: 0.0).toBigDecimal()
                 Column {
                     Row(
@@ -85,7 +86,10 @@ fun Categorias(
                         }
                         Column(Modifier.weight(1f)) {
                             Text(categoria.nombre, fontWeight = FontWeight.SemiBold)
-                            Text("${registros.size} ${if (registros.size == 1) "gasto" else "gastos"}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "$cantidadGastos ${if (cantidadGastos == 1) "gasto" else "gastos"}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                         Text(formatoMonto(total), fontWeight = FontWeight.Bold)
                         Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
