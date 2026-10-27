@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.lunes26oct.domain.model.Categoria
 import com.example.lunes26oct.domain.model.Gasto
+import com.example.lunes26oct.domain.model.ResumenCategoria
 import java.math.BigDecimal
 
 import com.example.lunes26oct.ui.components.FilaGasto
@@ -25,13 +26,14 @@ import com.example.lunes26oct.ui.util.formatoMonto
 @Composable
 fun PantallaPrincipal(
     gastos: List<Gasto>,
+    resumen: List<ResumenCategoria>,
     categorias: List<Categoria>,
     onEditar: (Gasto) -> Unit,
     onEliminar: (Gasto) -> Unit,
     mensaje: String,
     modifier: Modifier = Modifier
 ) {
-    val total = gastos.fold(BigDecimal.ZERO) { suma, gasto -> suma + gasto.monto.toBigDecimal() }
+    val total = resumen.fold(BigDecimal.ZERO) { suma, categoria -> suma + categoria.total.toBigDecimal() }
     val nombres = categorias.associate { it.id to it.nombre }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -60,6 +62,16 @@ fun PantallaPrincipal(
             }
         }
         if (mensaje.isNotEmpty()) item { Text(mensaje, color = MaterialTheme.colorScheme.primary) }
+        item { Text("Resumen por categoria", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold) }
+        if (resumen.isEmpty()) {
+            item { Text("Todavia no hay categorias. Entra a Categorias y pulsa + para crear una.") }
+        }
+        items(resumen, key = { "resumen_${it.nombre}" }) { categoria ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(categoria.nombre, Modifier.weight(1f))
+                Text(formatoMonto(categoria.total.toBigDecimal()), fontWeight = FontWeight.SemiBold)
+            }
+        }
         item {
             Text("Tus ultimos gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
         }

@@ -22,6 +22,7 @@ import com.example.lunes26oct.ui.components.IconoCategoria
 import com.example.lunes26oct.R
 import com.example.lunes26oct.domain.model.Categoria
 import com.example.lunes26oct.domain.model.Gasto
+import com.example.lunes26oct.domain.model.ResumenCategoria
 import com.example.lunes26oct.ui.util.formatoMonto
 import java.math.BigDecimal
 
@@ -29,6 +30,7 @@ import java.math.BigDecimal
 fun Categorias(
     categorias: List<Categoria>,
     gastos: List<Gasto>,
+    resumen: List<ResumenCategoria>,
     onVolver: () -> Unit,
     onAgregar: () -> Unit,
     onCategoria: (Categoria) -> Unit,
@@ -37,6 +39,7 @@ fun Categorias(
     modifier: Modifier = Modifier
 ) {
     val relacionados = gastos.groupBy { it.categoriaId }
+    val totales = resumen.associate { it.nombre to it.total }
     Column(modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onVolver) {
@@ -54,7 +57,7 @@ fun Categorias(
             items(categorias, key = { it.id }) { categoria ->
                 var menuAbierto by remember(categoria.id) { mutableStateOf(false) }
                 val registros = relacionados[categoria.id].orEmpty()
-                val total = registros.fold(BigDecimal.ZERO) { suma, gasto -> suma + gasto.monto.toBigDecimal() }
+                val total = (totales[categoria.nombre] ?: 0.0).toBigDecimal()
                 Column {
                     Row(
                         Modifier.fillMaxWidth().clickable { onCategoria(categoria) }.padding(vertical = 16.dp),

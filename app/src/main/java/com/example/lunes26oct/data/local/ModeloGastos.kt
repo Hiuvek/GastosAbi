@@ -1,5 +1,6 @@
 package com.example.lunes26oct.data.local
 import com.example.lunes26oct.domain.model.Categoria
+import com.example.lunes26oct.domain.model.normalizaMonto
 import com.example.lunes26oct.domain.model.Gasto
 import com.example.lunes26oct.domain.model.ResumenCategoria
 import android.content.ContentValues
@@ -9,8 +10,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 
-class ModeloGastos(context: Context) :
-    SQLiteOpenHelper(context, "gastos.db", null, 1) {
+class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
+    SQLiteOpenHelper(context, nombreBaseDatos, null, 2) {
 
     // Habilitar la integridad referencial.
     override fun onConfigure(db: SQLiteDatabase) {
@@ -31,7 +32,7 @@ class ModeloGastos(context: Context) :
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 categoria_id INTEGER NOT NULL,
                 descripcion TEXT,
-                monto INTEGER NOT NULL CHECK (monto > 0),
+                monto DOUBLE NOT NULL CHECK (monto > 0),
                 FOREIGN KEY (categoria_id)
                     REFERENCES categorias(id)
                     ON DELETE RESTRICT
@@ -44,12 +45,29 @@ class ModeloGastos(context: Context) :
         oldVersion: Int,
         newVersion: Int
     ) {
-        // Estrategia simple para la práctica:
-        // recrear las tablas al cambiar la versión.
-        // ATENCIÓN: esto elimina los datos existentes.
-        db.execSQL("DROP TABLE IF EXISTS gastos")
-        db.execSQL("DROP TABLE IF EXISTS categorias")
-        onCreate(db)
+        if (oldVersion < 2) {
+            // SQLiteOpenHelper ejecuta onUpgrade dentro de una transaccion.
+            // Mantener el valor mostrado por la version 1: 85 pasa a 85.00.
+            val secuencia = db.rawQuery(
+                "SELECT seq FROM sqlite_sequence WHERE name = 'gastos'", null
+            ).use { if (it.moveToFirst()) it.getLong(0) else 0L }
+            db.execSQL("""
+                CREATE TABLE gastos_nueva (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    categoria_id INTEGER NOT NULL,
+                    descripcion TEXT,
+                    monto DOUBLE NOT NULL CHECK (monto > 0),
+                    FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE RESTRICT
+                )
+            """.trimIndent())
+            db.execSQL("""
+                INSERT INTO gastos_nueva (id, categoria_id, descripcion, monto)
+                SELECT id, categoria_id, descripcion, CAST(monto AS DOUBLE) FROM gastos
+            """.trimIndent())
+            db.execSQL("DROP TABLE gastos")
+            db.execSQL("ALTER TABLE gastos_nueva RENAME TO gastos")
+            db.execSQL("UPDATE sqlite_sequence SET seq = MAX(seq, ?) WHERE name = 'gastos'", arrayOf(secuencia))
+        }
     }
 
     // Convierte la fila actual de un Cursor
@@ -78,7 +96,7 @@ class ModeloGastos(context: Context) :
                 null
             else
                 c.getString(indiceDescripcion),
-            monto = c.getLong(
+            monto = c.getDouble(
                 c.getColumnIndexOrThrow("monto")
             )
         )
@@ -211,12 +229,12 @@ class ModeloGastos(context: Context) :
     }
 
     fun insertaGasto(gasto: Gasto): Boolean {
-        if (gasto.monto <= 0L) return false
+        val monto = normalizaMonto(gasto.monto) ?: return false
 
         val valores = ContentValues().apply {
             put("categoria_id", gasto.categoriaId)
             put("descripcion", gasto.descripcion)
-            put("monto", gasto.monto)
+            put("monto", monto)
         }
 
         return try {
@@ -229,12 +247,12 @@ class ModeloGastos(context: Context) :
     }
 
     fun actualizaGasto(gasto: Gasto): Boolean {
-        if (gasto.monto <= 0L) return false
+        val monto = normalizaMonto(gasto.monto) ?: return false
 
         val valores = ContentValues().apply {
             put("categoria_id", gasto.categoriaId)
             put("descripcion", gasto.descripcion)
-            put("monto", gasto.monto)
+            put("monto", monto)
         }
 
         return try {
@@ -266,7 +284,7 @@ class ModeloGastos(context: Context) :
 
         val sql = """
 			SELECT c.nombre,
-				   COALESCE(SUM(g.monto), 0) AS total
+				   ROUND(COALESCE(SUM(g.monto), 0), 2) AS total
 			FROM categorias c
 			LEFT JOIN gastos g
 				ON c.id = g.categoria_id
@@ -279,7 +297,7 @@ class ModeloGastos(context: Context) :
                 resumen.add(
                     ResumenCategoria(
                         nombre = cursor.getString(0),
-                        total = cursor.getLong(1)
+                        total = cursor.getDouble(1)
                     )
                 )
             }

@@ -1,5 +1,7 @@
 package com.example.lunes26oct.ui.screens.gastos
 
+import com.example.lunes26oct.domain.model.leeMonto
+import kotlinx.coroutines.launch
 import com.example.lunes26oct.R
 import com.example.lunes26oct.ui.components.IconoGasto
 import com.example.lunes26oct.ui.components.IconoCategoria
@@ -25,11 +27,14 @@ import com.example.lunes26oct.domain.model.Gasto
 @Composable
 fun AgregarGasto(
     categorias: List<Categoria>,
-    onGuardar: (Long, String, Int) -> Boolean,
+    onGuardar: suspend (Double, String, Int) -> Boolean,
+    onCrearCategoria: () -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier,
     gastoInicial: Gasto? = null
 ) {
+    val scope = rememberCoroutineScope()
+    var guardando by remember { mutableStateOf(false) }
     var monto by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.monto?.toString().orEmpty()) }
     var concepto by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.descripcion.orEmpty()) }
     var categoriaId by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.categoriaId) }
@@ -46,6 +51,7 @@ fun AgregarGasto(
             Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
                 TextButton(
                     onClick = onVolver,
+                    enabled = !guardando,
                     modifier = Modifier.align(Alignment.CenterStart).semantics { contentDescription = "Volver" },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     contentPadding = PaddingValues(0.dp)
@@ -62,9 +68,9 @@ fun AgregarGasto(
                 OutlinedTextField(
                     value = monto,
                     onValueChange = { monto = it },
-                    placeholder = { Text("0") },
+                    placeholder = { Text("0.00") },
                     leadingIcon = { IconoGasto(R.drawable.ic_monto) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = forma,
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Monto" }
@@ -106,7 +112,7 @@ fun AgregarGasto(
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Concepto", fontWeight = FontWeight.SemiBold)
+                Text("Concepto (opcional)", fontWeight = FontWeight.SemiBold)
                 OutlinedTextField(
                     value = concepto,
                     onValueChange = { concepto = it },
@@ -117,19 +123,32 @@ fun AgregarGasto(
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Concepto" }
                 )
             }
+            if (categorias.isEmpty()) {
+                Text("Primero registra una categoria para poder guardar un gasto.")
+                TextButton(onClick = onCrearCategoria, enabled = !guardando) { Text("Crear categoria") }
+            }
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
             Button(
                 onClick = {
-                    val valor = monto.trim().toLongOrNull()
+                    val valor = leeMonto(monto)
                     val categoria = seleccionada
                     error = when {
-                        valor == null || valor <= 0L -> "Ingresa un monto entero mayor que cero."
-                        concepto.isBlank() -> "Escribe el concepto del gasto."
-                        categoria == null -> "Elige una categoría."
-                        !onGuardar(valor, concepto.trim(), categoria.id) -> "No se pudo guardar el gasto."
+                        valor == null -> "Ingresa un monto mayor que cero, con centavos."
+                        categoria == null -> "Elige una categoria."
                         else -> ""
                     }
+                    if (valor != null && categoria != null) {
+                        guardando = true
+                        scope.launch {
+                            try {
+                                if (!onGuardar(valor, concepto.trim(), categoria.id)) {
+                                    error = "No se pudo guardar el gasto."
+                                }
+                            } finally { guardando = false }
+                        }
+                    }
                 },
+                enabled = !guardando && categorias.isNotEmpty(),
                 shape = forma,
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp).heightIn(min = 56.dp)
             ) { Text(if (gastoInicial == null) "Guardar gasto" else "Guardar cambios", fontWeight = FontWeight.SemiBold) }
