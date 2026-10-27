@@ -25,6 +25,7 @@ fun PantallaPrincipal(
     gastos: List<Gasto>,
     categorias: List<Categoria>,
     mensaje: String,
+    onVerGastos: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val total = gastos.fold(BigDecimal.ZERO) { suma, gasto -> suma + gasto.monto.toBigDecimal() }
@@ -57,7 +58,10 @@ fun PantallaPrincipal(
         }
         if (mensaje.isNotEmpty()) item { Text(mensaje, color = MaterialTheme.colorScheme.primary) }
         item {
-            Text("Tus ultimos gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            Column {
+                Text("Tus ultimos gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                TextButton(onClick = onVerGastos) { Text("Ver todos") }
+            }
         }
         if (gastos.isEmpty()) {
             item {
@@ -66,28 +70,7 @@ fun PantallaPrincipal(
         }
         // El modelo consulta por id DESC: los primeros son los registros mas recientes.
         items(gastos.take(10), key = { it.id }) { gasto ->
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(painterResource(R.drawable.ic_categoria), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Text(nombres[gasto.categoriaId] ?: "Categoria", fontWeight = FontWeight.SemiBold)
-                        if (!gasto.descripcion.isNullOrBlank()) {
-                            Text(gasto.descripcion, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                    Text(formatoMonto(gasto.monto.toBigDecimal()), fontWeight = FontWeight.SemiBold)
-                }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            }
+            FilaGasto(gasto, nombres[gasto.categoriaId] ?: "Categoria")
         }
     }
 }
@@ -102,7 +85,7 @@ private fun DatoInicio(titulo: String, valor: String, modifier: Modifier) {
     }
 }
 
-private fun formatoMonto(monto: BigDecimal): String = "$ " + NumberFormat.getIntegerInstance().format(monto)
+internal fun formatoMonto(monto: BigDecimal): String = "$ " + NumberFormat.getIntegerInstance().format(monto)
 
 @Composable
 fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit) {
@@ -127,5 +110,31 @@ fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit)
                 Image(painterResource(R.drawable.ic_agregar), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary), contentDescription = "Agregar gasto", modifier = Modifier.size(28.dp))
             }
         }
+    }
+}
+
+@Composable
+internal fun FilaGasto(gasto: Gasto, nombreCategoria: String) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(painterResource(R.drawable.ic_categoria), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
+            }
+            Column(Modifier.weight(1f)) {
+                Text(nombreCategoria, fontWeight = FontWeight.SemiBold)
+                if (!gasto.descripcion.isNullOrBlank()) {
+                    Text(gasto.descripcion, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            Text(formatoMonto(gasto.monto.toBigDecimal()), fontWeight = FontWeight.SemiBold)
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }

@@ -30,8 +30,11 @@ class MainActivity : ComponentActivity() {
             var gastos by remember { mutableStateOf(modelo.leeGastos()) }
             var mensaje by remember { mutableStateOf("") }
             var agregando by rememberSaveable { mutableStateOf(false) }
+            var viendoLista by rememberSaveable { mutableStateOf(false) }
             val categorias = remember { modelo.leeCategorias() }
-            BackHandler(enabled = agregando) { agregando = false }
+            BackHandler(enabled = agregando || viendoLista) {
+                if (agregando) agregando = false else viendoLista = false
+            }
 
             Lunes26octTheme {
                 Scaffold(
@@ -40,7 +43,10 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         BarraInicio(
                             agregando = agregando,
-                            onInicio = { agregando = false },
+                            onInicio = {
+                                agregando = false
+                                viendoLista = false
+                            },
                             onAgregar = { agregando = true }
                         )
                     }
@@ -62,11 +68,19 @@ class MainActivity : ComponentActivity() {
                             onVolver = { agregando = false },
                             modifier = Modifier.padding(innerPadding)
                         )
+                    } else if (viendoLista) {
+                        ListaGastos(
+                            gastos = gastos,
+                            categorias = categorias,
+                            onVolver = { viendoLista = false },
+                            modifier = Modifier.padding(innerPadding)
+                        )
                     } else {
                         PantallaPrincipal(
                             gastos = gastos,
                             categorias = categorias,
                             mensaje = mensaje,
+                            onVerGastos = { viendoLista = true },
                             modifier = Modifier.padding(innerPadding)
                         )
                     }
