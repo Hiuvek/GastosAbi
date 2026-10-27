@@ -68,6 +68,14 @@ class MainActivity : ComponentActivity() {
             var editandoId by rememberSaveable { mutableStateOf<Int?>(null) }
             var eliminandoId by rememberSaveable { mutableStateOf<Int?>(null) }
             var errorEliminar by remember { mutableStateOf("") }
+            val abrirNuevaCategoria: () -> Unit = {
+                seccion = "categorias"
+                agregando = false
+                editandoId = null
+                categoriaDetalleId = null
+                editandoCategoriaId = null
+                creandoCategoria = true
+            }
             val editar: (Gasto) -> Unit = { gasto ->
                 editandoId = gasto.id
                 agregando = true
@@ -104,8 +112,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onAgregar = {
                                     if (viendoCategorias) {
-                                        editandoCategoriaId = null
-                                        creandoCategoria = true
+                                        abrirNuevaCategoria()
                                     }
                                     else {
                                         editandoId = null
@@ -168,7 +175,7 @@ class MainActivity : ComponentActivity() {
                                 categorias = categorias,
                                 gastos = gastos,
                                 onVolver = { seccion = "inicio" },
-                                onAgregar = { editandoCategoriaId = null; creandoCategoria = true },
+                                onAgregar = abrirNuevaCategoria,
                                 onCategoria = { categoriaDetalleId = it.id },
                                 onEditar = { categoria ->
                                     editandoCategoriaId = categoria.id
