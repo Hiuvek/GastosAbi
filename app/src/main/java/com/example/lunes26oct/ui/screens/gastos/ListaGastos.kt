@@ -28,7 +28,8 @@ fun ListaGastos(
     onEditar: (Gasto) -> Unit,
     onEliminar: (Gasto) -> Unit,
     onVolver: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    titulo: String = "Lista de gastos"
 ) {
     var busqueda by rememberSaveable { mutableStateOf("") }
     val nombres = categorias.associate { it.id to it.nombre }
@@ -46,11 +47,11 @@ fun ListaGastos(
         ) {
             IconButton(onClick = onVolver) {
                 Image(
-                    painterResource(R.drawable.ic_volver), contentDescription = "Volver a inicio",
+                    painterResource(R.drawable.ic_volver), contentDescription = "Volver",
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary), modifier = Modifier.size(24.dp)
                 )
             }
-            Text("Lista de gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(titulo, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
         OutlinedTextField(
             value = busqueda,

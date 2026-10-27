@@ -6,6 +6,7 @@ import com.example.lunes26oct.domain.model.Gasto
 import com.example.lunes26oct.domain.repository.RepositorioGastos
 
 class RepositorioGastosSqlite(private val modelo: ModeloGastos) : RepositorioGastos {
+    override fun insertaCategoria(categoria: Categoria): Boolean = modelo.insertaCategoria(categoria)
     override fun leeCategorias(): List<Categoria> = modelo.leeCategorias()
     override fun leeGastos(): List<Gasto> = modelo.leeGastos()
     override fun insertaGasto(gasto: Gasto): Boolean = modelo.insertaGasto(gasto)
