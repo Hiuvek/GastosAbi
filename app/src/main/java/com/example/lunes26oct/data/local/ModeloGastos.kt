@@ -1,19 +1,29 @@
 package com.example.lunes26oct.data.local
-import com.example.lunes26oct.domain.model.Categoria
-import com.example.lunes26oct.domain.model.normalizaMonto
-import com.example.lunes26oct.domain.model.Gasto
-import com.example.lunes26oct.domain.model.ResumenCategoria
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.lunes26oct.domain.model.Categoria
+import com.example.lunes26oct.domain.model.Gasto
+import com.example.lunes26oct.domain.model.ResumenCategoria
+import com.example.lunes26oct.domain.model.normalizaMonto
 
 class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
     SQLiteOpenHelper(context, nombreBaseDatos, null, 2) {
 
-    // Habilitar la integridad referencial.
+    private companion object {
+        const val TABLA_CATEGORIAS = "categorias"
+        const val TABLA_GASTOS = "gastos"
+        const val COLUMNA_ID = "id"
+        const val COLUMNA_NOMBRE = "nombre"
+        const val COLUMNA_CATEGORIA_ID = "categoria_id"
+        const val COLUMNA_DESCRIPCION = "descripcion"
+        const val COLUMNA_MONTO = "monto"
+    }
+
+    // Activa la integridad referencial.
     override fun onConfigure(db: SQLiteDatabase) {
         super.onConfigure(db)
         db.setForeignKeyConstraintsEnabled(true)
@@ -70,8 +80,26 @@ class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
         }
     }
 
-    // Convierte la fila actual de un Cursor
-    // en un objeto Categoria.
+    // Crea los valores usados para guardar una categoria.
+    private fun valoresCategoria(categoria: Categoria) = ContentValues().apply {
+        put(COLUMNA_NOMBRE, categoria.nombre.trim())
+    }
+
+    // Crea los valores usados para guardar un gasto.
+    private fun valoresGasto(gasto: Gasto, monto: Double) = ContentValues().apply {
+        put(COLUMNA_CATEGORIA_ID, gasto.categoriaId)
+        put(COLUMNA_DESCRIPCION, gasto.descripcion)
+        put(COLUMNA_MONTO, monto)
+    }
+
+    // Unifica el manejo de errores de escritura SQLite.
+    private fun ejecutarEscritura(operacion: () -> Boolean): Boolean = try {
+        operacion()
+    } catch (_: SQLiteException) {
+        false
+    }
+
+    // Convierte la fila actual del cursor en una categoria.
     private fun cursorCategoria(c: Cursor): Categoria {
         return Categoria(
             id = c.getInt(c.getColumnIndexOrThrow("id")),
@@ -81,8 +109,7 @@ class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
         )
     }
 
-    // Convierte la fila actual de un Cursor
-    // en un objeto Gasto.
+    // Convierte la fila actual del cursor en un gasto.
     private fun cursorGasto(c: Cursor): Gasto {
         val indiceDescripcion =
             c.getColumnIndexOrThrow("descripcion")
@@ -103,7 +130,7 @@ class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
     }
 
     // =========================================
-    //              CATEGORÍAS
+    //              CATEGORIAS
     // =========================================
 
     fun leeCategoria(id: Int): Categoria? {
@@ -144,48 +171,33 @@ class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
     fun insertaCategoria(categoria: Categoria): Boolean {
         if (categoria.nombre.isBlank()) return false
 
-        val valores = ContentValues().apply {
-            put("nombre", categoria.nombre.trim())
-        }
-
-        return try {
+        return ejecutarEscritura {
             writableDatabase.insert(
-                "categorias", null, valores
+                TABLA_CATEGORIAS, null, valoresCategoria(categoria)
             ) != -1L
-        } catch (e: SQLiteException) {
-            false
         }
     }
 
     fun actualizaCategoria(categoria: Categoria): Boolean {
         if (categoria.nombre.isBlank()) return false
 
-        val valores = ContentValues().apply {
-            put("nombre", categoria.nombre.trim())
-        }
-
-        return try {
+        return ejecutarEscritura {
             writableDatabase.update(
-                "categorias",
-                valores,
-                "id = ?",
+                TABLA_CATEGORIAS,
+                valoresCategoria(categoria),
+                "$COLUMNA_ID = ?",
                 arrayOf(categoria.id.toString())
             ) > 0
-        } catch (e: SQLiteException) {
-            false
         }
     }
 
     fun eliminaCategoria(id: Int): Boolean {
-        return try {
+        return ejecutarEscritura {
             writableDatabase.delete(
-                "categorias",
-                "id = ?",
+                TABLA_CATEGORIAS,
+                "$COLUMNA_ID = ?",
                 arrayOf(id.toString())
             ) > 0
-        } catch (e: SQLiteException) {
-            // Puede fallar por la llave foránea.
-            false
         }
     }
 
@@ -231,51 +243,33 @@ class ModeloGastos(context: Context, nombreBaseDatos: String = "gastos.db") :
     fun insertaGasto(gasto: Gasto): Boolean {
         val monto = normalizaMonto(gasto.monto) ?: return false
 
-        val valores = ContentValues().apply {
-            put("categoria_id", gasto.categoriaId)
-            put("descripcion", gasto.descripcion)
-            put("monto", monto)
-        }
-
-        return try {
+        return ejecutarEscritura {
             writableDatabase.insert(
-                "gastos", null, valores
+                TABLA_GASTOS, null, valoresGasto(gasto, monto)
             ) != -1L
-        } catch (e: SQLiteException) {
-            false
         }
     }
 
     fun actualizaGasto(gasto: Gasto): Boolean {
         val monto = normalizaMonto(gasto.monto) ?: return false
 
-        val valores = ContentValues().apply {
-            put("categoria_id", gasto.categoriaId)
-            put("descripcion", gasto.descripcion)
-            put("monto", monto)
-        }
-
-        return try {
+        return ejecutarEscritura {
             writableDatabase.update(
-                "gastos",
-                valores,
-                "id = ?",
+                TABLA_GASTOS,
+                valoresGasto(gasto, monto),
+                "$COLUMNA_ID = ?",
                 arrayOf(gasto.id.toString())
             ) > 0
-        } catch (e: SQLiteException) {
-            false
         }
     }
 
     fun eliminaGasto(id: Int): Boolean {
-        return try {
+        return ejecutarEscritura {
             writableDatabase.delete(
-                "gastos",
-                "id = ?",
+                TABLA_GASTOS,
+                "$COLUMNA_ID = ?",
                 arrayOf(id.toString())
             ) > 0
-        } catch (e: SQLiteException) {
-            false
         }
     }
 
