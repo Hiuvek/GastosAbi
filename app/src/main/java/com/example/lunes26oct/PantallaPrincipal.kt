@@ -111,7 +111,7 @@ fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit)
             TextButton(
                 onClick = onInicio,
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 20.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando) Color(0xFF141414) else Color(0xFF7E49B3))
+                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando) Color(0xFF141414) else Color(0xFF804CB4))
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(painterResource(R.drawable.ic_inicio), contentDescription = null, modifier = Modifier.size(26.dp))
@@ -122,7 +122,7 @@ fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit)
                 onClick = onAgregar,
                 modifier = Modifier.align(Alignment.Center).size(56.dp),
                 shape = RoundedCornerShape(18.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF7E49B3))
+                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF804CB4))
             ) {
                 Image(painterResource(R.drawable.ic_agregar), contentDescription = "Agregar gasto", modifier = Modifier.size(28.dp))
             }

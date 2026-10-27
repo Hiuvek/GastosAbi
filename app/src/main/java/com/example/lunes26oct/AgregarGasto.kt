@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.example.lunes26oct.ui.theme.Categoria
 
 internal val PaletaGastos = lightColorScheme(
-    primary = Color(0xFF7E49B3),
+    primary = Color(0xFF804CB4),
     onPrimary = Color.White,
     background = Color(0xFFCFCFCF),
     onBackground = Color(0xFF141414),
