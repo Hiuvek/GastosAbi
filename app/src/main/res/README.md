@@ -8,6 +8,8 @@
 
 Reemplaza los PNG conservando sus nombres. Se recomiendan imagenes cuadradas con fondo transparente.
 
+Los recursos globales (values, xml y mipmap) se encuentran en compartidos.
+
 Las carpetas estan registradas en app/build.gradle.kts como recursos del source set main. Android combina los recursos: cada nombre debe ser unico, aunque este en otra carpeta. Los recursos se siguen usando como R.drawable.ic_nombre.
 
 En Android Studio, usa la vista Project para ver las carpetas fisicas; la vista Android puede agrupar los drawables.

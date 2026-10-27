@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
-// Reemplaza los PNG de res-pantallas conservando sus nombres.
+// Reemplaza los PNG de las carpetas de res conservando sus nombres.
 @Composable
 internal fun IconoGasto(@DrawableRes recurso: Int) {
     Image(

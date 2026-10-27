@@ -21,13 +21,14 @@ android {
 
     // Cada pantalla tiene su propia carpeta de recursos Android.
     sourceSets.getByName("main") {
-        res.srcDirs(
-            "src/main/res",
-            "src/main/res-pantallas/inicio",
-            "src/main/res-pantallas/agregar_gasto",
-            "src/main/res-pantallas/lista_gastos",
-            "src/main/res-pantallas/categorias",
-            "src/main/res-pantallas/compartidos"
+        res.setSrcDirs(
+            listOf(
+                "src/main/res/inicio",
+                "src/main/res/agregar_gasto",
+                "src/main/res/lista_gastos",
+                "src/main/res/categorias",
+                "src/main/res/compartidos"
+            )
         )
     }
 

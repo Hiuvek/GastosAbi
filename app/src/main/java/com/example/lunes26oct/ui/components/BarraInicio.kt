@@ -19,7 +19,6 @@ fun BarraInicio(
     agregando: Boolean,
     viendoLista: Boolean,
     viendoCategorias: Boolean,
-    agregandoCategoria: Boolean,
     onInicio: () -> Unit,
     onAgregar: () -> Unit,
     onGastos: () -> Unit,
@@ -45,7 +44,7 @@ fun BarraInicio(
                 ) {
                     Image(
                         painterResource(R.drawable.ic_agregar),
-                        contentDescription = if (agregandoCategoria) "Agregar categoria" else "Agregar gasto",
+                        contentDescription = "Agregar gasto",
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
                         modifier = Modifier.size(28.dp)
                     )
