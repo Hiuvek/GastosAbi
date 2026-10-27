@@ -1,4 +1,7 @@
-package com.example.lunes26oct.ui.theme
+package com.example.lunes26oct.data.local
+import com.example.lunes26oct.domain.model.Categoria
+import com.example.lunes26oct.domain.model.Gasto
+import com.example.lunes26oct.domain.model.ResumenCategoria
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
