@@ -31,6 +31,7 @@ fun PantallaPrincipal(
     onEditar: (Gasto) -> Unit,
     onEliminar: (Gasto) -> Unit,
     mensaje: String,
+    uidDispositivo: String = "",
     modifier: Modifier = Modifier
 ) {
     val total = resumen.fold(BigDecimal.ZERO) { suma, categoria -> suma + categoria.total.toBigDecimal() }
@@ -41,7 +42,20 @@ fun PantallaPrincipal(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            Text("Hola, bienvenido.", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    "Hola, bienvenido.",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                if (uidDispositivo.isNotBlank()) {
+                    Text(
+                        "UID: $uidDispositivo",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
         item {
             Card(

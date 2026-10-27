@@ -2,6 +2,7 @@ package com.example.lunes26oct
 
 import android.database.sqlite.SQLiteException
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -40,6 +41,10 @@ class MainActivity : ComponentActivity() {
         val crearCategoria = CrearCategoria(repositorio)
         val editarCategoria = EditarCategoria(repositorio)
         val eliminarCategoria = EliminarCategoria(repositorio)
+        val uidDispositivo = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ANDROID_ID
+        ).orEmpty()
         enableEdgeToEdge()
         setContent {
             val scope = rememberCoroutineScope()
@@ -217,7 +222,16 @@ class MainActivity : ComponentActivity() {
                                 onEliminar = { if (!ocupado) eliminandoCategoriaId = it.id },
                                 modifier = contenido
                             )
-                            else -> PantallaPrincipal(gastos, resumen, categorias, editar, eliminar, mensaje, contenido)
+                            else -> PantallaPrincipal(
+                                gastos = gastos,
+                                resumen = resumen,
+                                categorias = categorias,
+                                onEditar = editar,
+                                onEliminar = eliminar,
+                                mensaje = mensaje,
+                                uidDispositivo = uidDispositivo,
+                                modifier = contenido
+                            )
                         }
                     }
                     if (creandoCategoria && !cargando) {
