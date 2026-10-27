@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                             agregando = agregando,
                             viendoLista = viendoLista,
                             viendoCategorias = viendoCategorias,
-                            agregandoCategoria = viendoCategorias && categoriaDetalleId == null,
+                            agregandoCategoria = viendoCategorias,
                             onInicio = {
                                 agregando = false
                                 seccion = "inicio"
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
                                 editandoId = null
                             },
                             onAgregar = {
-                                if (viendoCategorias && categoriaDetalleId == null) {
+                                if (viendoCategorias) {
                                     editandoCategoriaId = null
                                     creandoCategoria = true
                                 }
