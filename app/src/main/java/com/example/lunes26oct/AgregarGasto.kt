@@ -21,17 +21,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.lunes26oct.ui.theme.Categoria
+import com.example.lunes26oct.ui.theme.Gasto
 
 @Composable
 fun AgregarGasto(
     categorias: List<Categoria>,
     onGuardar: (Long, String, Int) -> Boolean,
     onVolver: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    gastoInicial: Gasto? = null
 ) {
-    var monto by rememberSaveable { mutableStateOf("") }
-    var concepto by rememberSaveable { mutableStateOf("") }
-    var categoriaId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var monto by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.monto?.toString().orEmpty()) }
+    var concepto by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.descripcion.orEmpty()) }
+    var categoriaId by rememberSaveable(gastoInicial?.id) { mutableStateOf(gastoInicial?.categoriaId) }
     var menuAbierto by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf("") }
     val seleccionada = categorias.firstOrNull { it.id == categoriaId }
@@ -50,7 +52,7 @@ fun AgregarGasto(
                     contentPadding = PaddingValues(0.dp)
                 ) { IconoGasto(R.drawable.ic_volver) }
                 Text(
-                    "Agregar gasto",
+                    if (gastoInicial == null) "Agregar gasto" else "Editar gasto",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
@@ -130,7 +132,7 @@ fun AgregarGasto(
                 },
                 shape = forma,
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp).heightIn(min = 56.dp)
-            ) { Text("Guardar gasto", fontWeight = FontWeight.SemiBold) }
+            ) { Text(if (gastoInicial == null) "Guardar gasto" else "Guardar cambios", fontWeight = FontWeight.SemiBold) }
         }
     }
 }

@@ -22,6 +22,8 @@ import java.math.BigDecimal
 fun ListaGastos(
     gastos: List<Gasto>,
     categorias: List<Categoria>,
+    onEditar: (Gasto) -> Unit,
+    onEliminar: (Gasto) -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -81,7 +83,7 @@ fun ListaGastos(
                 }
             }
             items(visibles, key = { it.id }) { gasto ->
-                FilaGasto(gasto, nombres[gasto.categoriaId] ?: "Categoria")
+                FilaGasto(gasto, nombres[gasto.categoriaId] ?: "Categoria", onEditar, onEliminar)
             }
         }
     }

@@ -7,7 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -24,6 +27,8 @@ import java.text.NumberFormat
 fun PantallaPrincipal(
     gastos: List<Gasto>,
     categorias: List<Categoria>,
+    onEditar: (Gasto) -> Unit,
+    onEliminar: (Gasto) -> Unit,
     mensaje: String,
     modifier: Modifier = Modifier
 ) {
@@ -66,7 +71,7 @@ fun PantallaPrincipal(
         }
         // El modelo consulta por id DESC: los primeros son los registros mas recientes.
         items(gastos.take(10), key = { it.id }) { gasto ->
-            FilaGasto(gasto, nombres[gasto.categoriaId] ?: "Categoria")
+            FilaGasto(gasto, nombres[gasto.categoriaId] ?: "Categoria", onEditar, onEliminar)
         }
     }
 }
@@ -133,7 +138,13 @@ fun BarraInicio(
 }
 
 @Composable
-internal fun FilaGasto(gasto: Gasto, nombreCategoria: String) {
+internal fun FilaGasto(
+    gasto: Gasto,
+    nombreCategoria: String,
+    onEditar: (Gasto) -> Unit,
+    onEliminar: (Gasto) -> Unit
+) {
+    var menuAbierto by remember(gasto.id) { mutableStateOf(false) }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -153,6 +164,22 @@ internal fun FilaGasto(gasto: Gasto, nombreCategoria: String) {
                 }
             }
             Text(formatoMonto(gasto.monto.toBigDecimal()), fontWeight = FontWeight.SemiBold)
+            Box {
+                IconButton(
+                    onClick = { menuAbierto = true },
+                    modifier = Modifier.semantics { contentDescription = "Opciones del gasto ${gasto.descripcion.orEmpty()}" }
+                ) { Text("⋮", fontSize = 26.sp) }
+                DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
+                    DropdownMenuItem(text = { Text("Editar") }, onClick = {
+                        menuAbierto = false
+                        onEditar(gasto)
+                    })
+                    DropdownMenuItem(text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) }, onClick = {
+                        menuAbierto = false
+                        onEliminar(gasto)
+                    })
+                }
+            }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
