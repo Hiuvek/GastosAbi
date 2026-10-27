@@ -10,7 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,7 +39,7 @@ fun PantallaPrincipal(
         }
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE3D5EF)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -51,8 +51,8 @@ fun PantallaPrincipal(
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                DatoInicio("Gastos", gastos.size.toString(), Color(0xFFEBDCDF), Modifier.weight(1f))
-                DatoInicio("Categorias utilizadas", gastos.map { it.categoriaId }.distinct().size.toString(), Color(0xFFDDD5E6), Modifier.weight(1f))
+                DatoInicio("Gastos", gastos.size.toString(), Modifier.weight(1f))
+                DatoInicio("Categorias utilizadas", gastos.map { it.categoriaId }.distinct().size.toString(), Modifier.weight(1f))
             }
         }
         if (mensaje.isNotEmpty()) item { Text(mensaje, color = MaterialTheme.colorScheme.primary) }
@@ -73,31 +73,31 @@ fun PantallaPrincipal(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(
-                        modifier = Modifier.size(44.dp).background(Color(0xFFE3D5EF), RoundedCornerShape(14.dp)),
+                        modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Image(painterResource(R.drawable.ic_categoria), contentDescription = null, modifier = Modifier.size(26.dp))
+                        Image(painterResource(R.drawable.ic_categoria), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
                     }
                     Column(Modifier.weight(1f)) {
                         Text(nombres[gasto.categoriaId] ?: "Categoria", fontWeight = FontWeight.SemiBold)
                         if (!gasto.descripcion.isNullOrBlank()) {
-                            Text(gasto.descripcion, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                            Text(gasto.descripcion, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Text(formatoMonto(gasto.monto.toBigDecimal()), fontWeight = FontWeight.SemiBold)
                 }
-                HorizontalDivider(color = Color(0xFFB7B7B7))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
     }
 }
 
 @Composable
-private fun DatoInicio(titulo: String, valor: String, fondo: Color, modifier: Modifier) {
-    Card(modifier, shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = fondo)) {
+private fun DatoInicio(titulo: String, valor: String, modifier: Modifier) {
+    Card(modifier, shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(titulo, style = MaterialTheme.typography.bodyMedium)
-            Text(valor, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(valor, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -106,15 +106,15 @@ private fun formatoMonto(monto: BigDecimal): String = "$ " + NumberFormat.getInt
 
 @Composable
 fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit) {
-    Surface(color = Color(0xFFE3D5EF), shadowElevation = 6.dp) {
+    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp) {
         Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().height(80.dp)) {
             TextButton(
                 onClick = onInicio,
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 20.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando) Color(0xFF141414) else Color(0xFF804CB4))
+                colors = ButtonDefaults.textButtonColors(contentColor = if (agregando) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(R.drawable.ic_inicio), contentDescription = null, modifier = Modifier.size(26.dp))
+                    Image(painterResource(R.drawable.ic_inicio), colorFilter = ColorFilter.tint(if (agregando) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary), contentDescription = null, modifier = Modifier.size(26.dp))
                     Text("Inicio")
                 }
             }
@@ -122,9 +122,9 @@ fun BarraInicio(agregando: Boolean, onInicio: () -> Unit, onAgregar: () -> Unit)
                 onClick = onAgregar,
                 modifier = Modifier.align(Alignment.Center).size(56.dp),
                 shape = RoundedCornerShape(18.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF804CB4))
+                colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Image(painterResource(R.drawable.ic_agregar), contentDescription = "Agregar gasto", modifier = Modifier.size(28.dp))
+                Image(painterResource(R.drawable.ic_agregar), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary), contentDescription = "Agregar gasto", modifier = Modifier.size(28.dp))
             }
         }
     }

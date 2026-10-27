@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.example.lunes26oct.ui.theme.Gasto
 import androidx.compose.material3.MaterialTheme
+import com.example.lunes26oct.ui.theme.Lunes26octTheme
 import com.example.lunes26oct.ui.theme.ModeloGastos
 
 class MainActivity : ComponentActivity() {
@@ -32,10 +33,10 @@ class MainActivity : ComponentActivity() {
             val categorias = remember { modelo.leeCategorias() }
             BackHandler(enabled = agregando) { agregando = false }
 
-            MaterialTheme(colorScheme = PaletaGastos) {
+            Lunes26octTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = androidx.compose.ui.graphics.Color(0xFFCFCFCF),
+                    containerColor = MaterialTheme.colorScheme.background,
                     bottomBar = {
                         BarraInicio(
                             agregando = agregando,
