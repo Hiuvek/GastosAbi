@@ -5,25 +5,17 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.lunes26oct.ui.theme.Gasto
-import com.example.lunes26oct.ui.theme.Lunes26octTheme
+import androidx.compose.material3.MaterialTheme
 import com.example.lunes26oct.ui.theme.ModeloGastos
 
 class MainActivity : ComponentActivity() {
@@ -34,14 +26,24 @@ class MainActivity : ComponentActivity() {
         modelo = ModeloGastos(applicationContext)
         enableEdgeToEdge()
         setContent {
-            var resumen by remember { mutableStateOf(modelo.resumenCategorias()) }
+            var gastos by remember { mutableStateOf(modelo.leeGastos()) }
             var mensaje by remember { mutableStateOf("") }
             var agregando by rememberSaveable { mutableStateOf(false) }
             val categorias = remember { modelo.leeCategorias() }
             BackHandler(enabled = agregando) { agregando = false }
 
-            Lunes26octTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            MaterialTheme(colorScheme = PaletaGastos) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = androidx.compose.ui.graphics.Color(0xFFCFCFCF),
+                    bottomBar = {
+                        BarraInicio(
+                            agregando = agregando,
+                            onInicio = { agregando = false },
+                            onAgregar = { agregando = true }
+                        )
+                    }
+                ) { innerPadding ->
                     if (agregando) {
                         AgregarGasto(
                             categorias = categorias,
@@ -50,7 +52,7 @@ class MainActivity : ComponentActivity() {
                                     Gasto(categoriaId = categoriaId, descripcion = concepto, monto = monto)
                                 )
                                 if (guardado) {
-                                    resumen = modelo.resumenCategorias()
+                                    gastos = modelo.leeGastos()
                                     mensaje = "Gasto guardado."
                                     agregando = false
                                 }
@@ -59,22 +61,13 @@ class MainActivity : ComponentActivity() {
                             onVolver = { agregando = false },
                             modifier = Modifier.padding(innerPadding)
                         )
-                    } else Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text("Gastos por categoría", style = MaterialTheme.typography.headlineSmall)
-                        Button(onClick = { agregando = true }) {
-                            Text("Agregar gasto")
-                        }
-                        if (mensaje.isNotEmpty()) Text(mensaje)
-                        if (resumen.isEmpty()) Text("Todavía no hay categorías.")
-                        resumen.forEach { categoria ->
-                            Text("${categoria.nombre}: ${categoria.total}")
-                        }
+                    } else {
+                        PantallaPrincipal(
+                            gastos = gastos,
+                            categorias = categorias,
+                            mensaje = mensaje,
+                            modifier = Modifier.padding(innerPadding)
+                        )
                     }
                 }
             }

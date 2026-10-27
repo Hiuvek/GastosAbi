@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.lunes26oct.ui.theme.Categoria
 
-private val PaletaGastos = lightColorScheme(
+internal val PaletaGastos = lightColorScheme(
     primary = Color(0xFF7E49B3),
     onPrimary = Color.White,
     background = Color(0xFFCFCFCF),
