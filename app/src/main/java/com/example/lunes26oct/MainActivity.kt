@@ -215,6 +215,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                     creandoCategoria = false
                                     editandoCategoriaId = null
+                                    if (actual == null) {
+                                        seccion = "gastos"
+                                        categoriaDetalleId = null
+                                        editandoId = null
+                                        agregando = true
+                                    }
                                 }
                                 guardada
                             }
